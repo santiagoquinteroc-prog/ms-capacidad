@@ -67,11 +67,30 @@ public class CapacidadRouter {
 					@ApiResponse(responseCode = "502", description = "Error en servicio de tecnologías")
 				}
 			)
+		),
+		@RouterOperation(
+			path = "/capacidades/{id}",
+			produces = {MediaType.APPLICATION_JSON_VALUE},
+			method = RequestMethod.GET,
+			beanClass = CapacidadHandler.class,
+			beanMethod = "getById",
+			operation = @Operation(
+				operationId = "getCapacidadById",
+				summary = "Obtener capacidad por ID",
+				tags = {"Capacidades"},
+				responses = {
+					@ApiResponse(responseCode = "200", description = "OK",
+						content = @Content(schema = @Schema(implementation = CapacidadResponse.class))),
+					@ApiResponse(responseCode = "404", description = "Capacidad no encontrada"),
+					@ApiResponse(responseCode = "502", description = "Error en servicio de tecnologías")
+				}
+			)
 		)
 	})
 	public RouterFunction<ServerResponse> capacidadRoutes(CapacidadHandler handler) {
 		return RouterFunctions.route(POST("/capacidades").and(accept(MediaType.APPLICATION_JSON)), handler::create)
-			.andRoute(GET("/capacidades"), handler::list);
+			.andRoute(GET("/capacidades"), handler::list)
+			.andRoute(GET("/capacidades/{id}"), handler::getById);
 	}
 }
 

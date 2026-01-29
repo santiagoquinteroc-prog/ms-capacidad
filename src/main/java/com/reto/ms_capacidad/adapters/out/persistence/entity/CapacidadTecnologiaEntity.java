@@ -14,3 +14,4 @@ public class CapacidadTecnologiaEntity {
 	private Long tecnologiaId;
 }
 
+

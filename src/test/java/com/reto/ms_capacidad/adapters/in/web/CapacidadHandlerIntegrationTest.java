@@ -127,5 +127,44 @@ class CapacidadHandlerIntegrationTest {
 			.exchange()
 			.expectStatus().isBadGateway();
 	}
+
+	@Test
+	void shouldReturn200WhenCapacidadExists() {
+		stubFor(get(urlEqualTo("/tecnologias/1"))
+			.willReturn(aResponse()
+				.withStatus(200)
+				.withHeader("Content-Type", "application/json")
+				.withBody("{\"id\":1,\"nombre\":\"Java\",\"descripcion\":\"Java\"}")));
+
+		stubFor(get(urlEqualTo("/tecnologias/2"))
+			.willReturn(aResponse()
+				.withStatus(200)
+				.withHeader("Content-Type", "application/json")
+				.withBody("{\"id\":2,\"nombre\":\"Spring\",\"descripcion\":\"Spring\"}")));
+
+		webTestClient.get()
+			.uri("/capacidades/1")
+			.accept(MediaType.APPLICATION_JSON)
+			.exchange()
+			.expectStatus().isOk()
+			.expectHeader().contentType(MediaType.APPLICATION_JSON)
+			.expectBody()
+			.jsonPath("$.id").exists()
+			.jsonPath("$.nombre").exists()
+			.jsonPath("$.descripcion").exists()
+			.jsonPath("$.cantidadTecnologias").exists()
+			.jsonPath("$.tecnologias").isArray();
+	}
+
+	@Test
+	void shouldReturn404WhenCapacidadDoesNotExist() {
+		webTestClient.get()
+			.uri("/capacidades/999")
+			.accept(MediaType.APPLICATION_JSON)
+			.exchange()
+			.expectStatus().isNotFound()
+			.expectBody()
+			.jsonPath("$.message").exists();
+	}
 }
 
