@@ -1,4 +1,4 @@
-package com.reto.ms_capacidad.adapters.in.web.dto.response;
+package com.reto.ms_capacidad.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,11 +9,19 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CapacidadResponse {
+public class CapacidadConTecnologias {
 	private Long id;
 	private String nombre;
 	private String descripcion;
 	private Integer cantidadTecnologias;
-	private List<TecnologiaInfoResponse> tecnologias;
+	private List<TecnologiaInfo> tecnologias;
+	
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class TecnologiaInfo {
+		private Long id;
+		private String nombre;
+	}
 }
 

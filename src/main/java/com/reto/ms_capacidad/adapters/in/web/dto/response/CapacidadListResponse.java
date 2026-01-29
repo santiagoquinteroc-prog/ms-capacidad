@@ -9,11 +9,10 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CapacidadResponse {
-	private Long id;
-	private String nombre;
-	private String descripcion;
-	private Integer cantidadTecnologias;
-	private List<TecnologiaInfoResponse> tecnologias;
+public class CapacidadListResponse {
+	private Integer page;
+	private Integer size;
+	private Long totalElements;
+	private List<CapacidadResponse> items;
 }
 

@@ -63,6 +63,76 @@ public class CapacidadRepositoryAdapter implements CapacidadRepositoryPort {
 			.onErrorReturn(false);
 	}
 
+	@Override
+	public Flux<Capacidad> findAll(int page, int size, String sortBy, String direction) {
+		String orderBy = buildOrderBy(sortBy, direction);
+		int offset = page * size;
+		
+		String sql = "SELECT id, nombre, descripcion FROM capacidad " + orderBy + " LIMIT :size OFFSET :offset";
+		
+		return databaseClient.sql(sql)
+			.bind("size", size)
+			.bind("offset", offset)
+			.fetch()
+			.all()
+			.map(this::rowToCapacidad);
+	}
+
+	@Override
+	public Mono<Long> count() {
+		return databaseClient.sql("SELECT COUNT(*) as count FROM capacidad")
+			.fetch()
+			.one()
+			.map(row -> {
+				Object countObj = row.get("count");
+				if (countObj instanceof Number) {
+					return ((Number) countObj).longValue();
+				}
+				return 0L;
+			});
+	}
+
+	@Override
+	public Flux<Long> findTecnologiaIdsByCapacidadId(Long capacidadId) {
+		return databaseClient.sql("SELECT tecnologia_id FROM capacidad_tecnologia WHERE capacidad_id = :capacidadId")
+			.bind("capacidadId", capacidadId)
+			.fetch()
+			.all()
+			.map(row -> {
+				Object idObj = row.get("tecnologia_id");
+				if (idObj instanceof Number) {
+					return ((Number) idObj).longValue();
+				}
+				return null;
+			})
+			.filter(id -> id != null);
+	}
+
+	private String buildOrderBy(String sortBy, String direction) {
+		String orderColumn;
+		if ("cantidadTecnologias".equals(sortBy)) {
+			orderColumn = "(SELECT COUNT(*) FROM capacidad_tecnologia WHERE capacidad_tecnologia.capacidad_id = capacidad.id)";
+		} else {
+			orderColumn = "nombre";
+		}
+		String dir = "desc".equalsIgnoreCase(direction) ? "DESC" : "ASC";
+		return "ORDER BY " + orderColumn + " " + dir;
+	}
+
+	private Capacidad rowToCapacidad(java.util.Map<String, Object> row) {
+		Long id = getLongValue(row.get("id"));
+		String nombre = (String) row.get("nombre");
+		String descripcion = (String) row.get("descripcion");
+		return new Capacidad(id, nombre, descripcion, null);
+	}
+
+	private Long getLongValue(Object value) {
+		if (value instanceof Number) {
+			return ((Number) value).longValue();
+		}
+		return null;
+	}
+
 	private CapacidadEntity toEntity(Capacidad capacidad) {
 		return new CapacidadEntity(
 			capacidad.getId(),
