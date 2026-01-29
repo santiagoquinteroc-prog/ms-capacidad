@@ -1,6 +1,7 @@
 package com.reto.ms_capacidad.adapters.in.web.router;
 
 import com.reto.ms_capacidad.adapters.in.web.dto.request.CreateCapacidadRequest;
+import com.reto.ms_capacidad.adapters.in.web.dto.response.CapacidadListResponse;
 import com.reto.ms_capacidad.adapters.in.web.dto.response.CapacidadResponse;
 import com.reto.ms_capacidad.adapters.in.web.handler.CapacidadHandler;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,6 +20,7 @@ import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
+import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
 import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
 
 @Configuration
@@ -47,12 +49,29 @@ public class CapacidadRouter {
 					@ApiResponse(responseCode = "409", description = "Nombre duplicado")
 				}
 			)
+		),
+		@RouterOperation(
+			path = "/capacidades",
+			produces = {MediaType.APPLICATION_JSON_VALUE},
+			method = RequestMethod.GET,
+			beanClass = CapacidadHandler.class,
+			beanMethod = "list",
+			operation = @Operation(
+				operationId = "listCapacidades",
+				summary = "Listar capacidades",
+				tags = {"Capacidades"},
+				responses = {
+					@ApiResponse(responseCode = "200", description = "OK",
+						content = @Content(schema = @Schema(implementation = CapacidadListResponse.class))),
+					@ApiResponse(responseCode = "400", description = "Solicitud inválida"),
+					@ApiResponse(responseCode = "502", description = "Error en servicio de tecnologías")
+				}
+			)
 		)
 	})
 	public RouterFunction<ServerResponse> capacidadRoutes(CapacidadHandler handler) {
-		return RouterFunctions.route()
-			.POST("/capacidades", accept(MediaType.APPLICATION_JSON), handler::create)
-			.build();
+		return RouterFunctions.route(POST("/capacidades").and(accept(MediaType.APPLICATION_JSON)), handler::create)
+			.andRoute(GET("/capacidades"), handler::list);
 	}
 }
 
