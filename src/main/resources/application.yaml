@@ -1,3 +1,19 @@
 spring:
   application:
     name: ms-capacidad
+  r2dbc:
+    url: r2dbc:mysql://localhost:3308/capacidad_db
+    username: app
+    password: app
+
+server:
+  port: 8081
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+
+ms:
+  tecnologia:
+    url: ${MS_TECNOLOGIA_URL:http://localhost:8080}

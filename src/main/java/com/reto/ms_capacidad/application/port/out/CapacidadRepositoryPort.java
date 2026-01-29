@@ -5,5 +5,6 @@ import reactor.core.publisher.Mono;
 
 public interface CapacidadRepositoryPort {
 	Mono<Capacidad> save(Capacidad capacidad);
+	Mono<Boolean> existsByNombre(String nombre);
 }
 

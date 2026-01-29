@@ -11,6 +11,7 @@ public class CapacidadMapper {
 		Capacidad capacidad = new Capacidad();
 		capacidad.setNombre(request.getNombre());
 		capacidad.setDescripcion(request.getDescripcion());
+		capacidad.setTecnologiaIds(request.getTecnologiaIds());
 		return capacidad;
 	}
 
