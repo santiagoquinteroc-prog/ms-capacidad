@@ -12,3 +12,4 @@ public class TecnologiaInfoResponse {
 	private String nombre;
 }
 
+
