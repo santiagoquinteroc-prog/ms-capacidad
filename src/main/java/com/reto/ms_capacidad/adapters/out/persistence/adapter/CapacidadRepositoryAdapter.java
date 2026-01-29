@@ -64,6 +64,16 @@ public class CapacidadRepositoryAdapter implements CapacidadRepositoryPort {
 	}
 
 	@Override
+	public Mono<Capacidad> findById(Long id) {
+		return databaseClient.sql("SELECT id, nombre, descripcion FROM capacidad WHERE id = :id")
+			.bind("id", id)
+			.fetch()
+			.one()
+			.map(this::rowToCapacidad)
+			.switchIfEmpty(Mono.empty());
+	}
+
+	@Override
 	public Flux<Capacidad> findAll(int page, int size, String sortBy, String direction) {
 		String orderBy = buildOrderBy(sortBy, direction);
 		int offset = page * size;

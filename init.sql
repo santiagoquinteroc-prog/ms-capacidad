@@ -11,3 +11,4 @@ CREATE TABLE IF NOT EXISTS capacidad_tecnologia (
     FOREIGN KEY (capacidad_id) REFERENCES capacidad(id)
 );
 
+

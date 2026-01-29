@@ -7,6 +7,7 @@ import reactor.core.publisher.Mono;
 public interface CapacidadRepositoryPort {
 	Mono<Capacidad> save(Capacidad capacidad);
 	Mono<Boolean> existsByNombre(String nombre);
+	Mono<Capacidad> findById(Long id);
 	Flux<Capacidad> findAll(int page, int size, String sortBy, String direction);
 	Mono<Long> count();
 	Flux<Long> findTecnologiaIdsByCapacidadId(Long capacidadId);

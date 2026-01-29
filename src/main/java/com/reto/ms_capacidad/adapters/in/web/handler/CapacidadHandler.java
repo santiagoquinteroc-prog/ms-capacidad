@@ -7,6 +7,7 @@ import com.reto.ms_capacidad.domain.exception.NombreDuplicadoException;
 import com.reto.ms_capacidad.domain.exception.TecnologiaNotFoundException;
 import com.reto.ms_capacidad.domain.exception.TecnologiaServiceException;
 import com.reto.ms_capacidad.application.port.in.CreateCapacidadPort;
+import com.reto.ms_capacidad.application.port.in.GetCapacidadByIdPort;
 import com.reto.ms_capacidad.application.port.in.ListCapacidadesPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -18,15 +19,18 @@ import reactor.util.function.Tuple2;
 @Component
 public class CapacidadHandler {
 	private final CreateCapacidadPort createCapacidadPort;
+	private final GetCapacidadByIdPort getCapacidadByIdPort;
 	private final ListCapacidadesPort listCapacidadesPort;
 	private final CapacidadMapper capacidadMapper;
 
 	public CapacidadHandler(
 		CreateCapacidadPort createCapacidadPort,
+		GetCapacidadByIdPort getCapacidadByIdPort,
 		ListCapacidadesPort listCapacidadesPort,
 		CapacidadMapper capacidadMapper
 	) {
 		this.createCapacidadPort = createCapacidadPort;
+		this.getCapacidadByIdPort = getCapacidadByIdPort;
 		this.listCapacidadesPort = listCapacidadesPort;
 		this.capacidadMapper = capacidadMapper;
 	}
@@ -96,6 +100,26 @@ public class CapacidadHandler {
 			.onErrorResume(ex -> 
 				ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.bodyValue(new ErrorResponse(ex.getMessage())));
+	}
+
+	public Mono<ServerResponse> getById(ServerRequest request) {
+		try {
+			Long id = Long.parseLong(request.pathVariable("id"));
+			
+			return getCapacidadByIdPort.getById(id)
+				.flatMap(capacidadConTecnologias -> {
+					var response = capacidadMapper.toResponse(capacidadConTecnologias);
+					return ServerResponse.ok().bodyValue(response);
+				})
+				.switchIfEmpty(ServerResponse.status(HttpStatus.NOT_FOUND)
+					.bodyValue(new ErrorResponse("Capacidad con ID " + id + " no encontrada")))
+				.onErrorResume(TecnologiaServiceException.class, ex -> 
+					ServerResponse.status(HttpStatus.BAD_GATEWAY)
+						.bodyValue(new ErrorResponse(ex.getMessage())));
+		} catch (NumberFormatException ex) {
+			return ServerResponse.status(HttpStatus.BAD_REQUEST)
+				.bodyValue(new ErrorResponse("ID inválido"));
+		}
 	}
 
 	private int parseIntOrDefault(String value, int defaultValue) {
